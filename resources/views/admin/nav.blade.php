@@ -68,6 +68,16 @@
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu">
 
+                            @role('Admin')
+
+                                @foreach($posts as $post)
+                                    <li>
+                                        <router-link :to="{ name: 'forms', params: { id: {{ $post->id }} }}">{{ $post->number . ': ' . $post->name }}</router-link>
+                                    </li>
+                                @endforeach
+
+                            @endrole
+
                             @foreach($posts as $post)
                                 @role('Postbemanning ' . $post->number)
                                 <li>
