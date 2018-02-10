@@ -1,0 +1,60 @@
+
+// Fonts
+@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+
+
+.fade-enter-active, .fade-leave-active {
+  transition-property: opacity;
+  transition-duration: .25s;
+}
+
+.fade-enter-active {
+  transition-delay: .25s;
+}
+
+.fade-enter, .fade-leave-active {
+  opacity: 0
+}
+
+.form-post {
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  li {
+    margin-bottom: 20px;
+  }
+  .score {
+    margin-bottom: 10px;
+  }
+}
+
+.green {
+  background-color: lightgreen;
+}
+.red {
+  background-color: rgba(232, 109, 109, 0.22);
+  color: white;
+}
+
+table .alert {
+  background-color: red;
+  color: white;
+}
+
+.roles-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  input[type="radio"], input[type="checkbox"] {
+    margin-right: 10px;
+  }
+}
