@@ -51,7 +51,6 @@
                     let times = [];
 
                     group.relationships.times.forEach(function (time, key) {
-                        console.log(time);
 
                         if (time.post == 1) {
                             if (typeof time.departure !== 'undefined') {
@@ -65,8 +64,6 @@
                     });
 
                     times.sort(app.sortNumber);
-
-                    console.log(times);
 
                     dataset.push({
                         label: group.groupname,

@@ -63701,7 +63701,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 var times = [];
 
                 group.relationships.times.forEach(function (time, key) {
-                    console.log(time);
 
                     if (time.post == 1) {
                         if (typeof time.departure !== 'undefined') {
@@ -63715,8 +63714,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 });
 
                 times.sort(app.sortNumber);
-
-                console.log(times);
 
                 dataset.push({
                     label: group.groupname,
