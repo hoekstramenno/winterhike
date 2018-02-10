@@ -7,34 +7,15 @@
         data: function () {
             return {
                 posts: [],
-                groups: []
+                groups: [],
+                dataset: []
             }
         },
         created() {
-
         },
         mounted () {
             this.fetchPosts();
             this.fetchGroupsWithTimes();
-
-            var app = this;
-            this.renderChart({
-                labels: app.posts,
-                datasets: [
-                    {
-                        label: 'Ploeg 1',
-                        borderColor: '#f87979',
-                        fill: false,
-                        data: ['1200', '1300', '1400']
-                    },
-                    {
-                        label: 'Ploeg 2',
-                        borderColor: 'green',
-                        fill: false,
-                        data: ['1230', '1320', '1410']
-                    }
-                ]
-            }, {responsive: true, maintainAspectRatio: false})
         },
         methods: {
             fetchPosts() {
@@ -51,7 +32,62 @@
                 axios.get('/api/v1/groups')
                     .then(function (response) {
                         app.groups = response.data.data;
+                        app.createDataSet(response.data.data);
+
+                        app.renderChart({
+                            labels: app.posts,
+                            datasets: app.dataset
+                        }, {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                        });
                     });
+            },
+            createDataSet(groups) {
+                let dataset = [], app = this;
+
+                groups.forEach(function (group, key) {
+
+                    let times = [];
+
+                    group.relationships.times.forEach(function (time, key) {
+                        console.log(time);
+
+                        if (time.post == 1) {
+                            if (typeof time.departure !== 'undefined') {
+                                times.push(time.departure.replace(/:/g,'').slice(0, -2));
+                            }
+                        }
+
+                        if (typeof time.arrival !== 'undefined') {
+                                times.push(time.arrival.replace(/:/g,'').slice(0, -2));
+                        }
+                    });
+
+                    times.sort(app.sortNumber);
+
+                    console.log(times);
+
+                    dataset.push({
+                        label: group.groupname,
+                        borderColor: app.getRandomColor(),
+                        fill: false,
+                        data: times
+                    });
+                });
+
+                this.dataset = dataset;
+            },
+            sortNumber(a,b) {
+                return a - b;
+            },
+            getRandomColor() {
+                let letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
             }
         }
 

@@ -60938,7 +60938,7 @@ window.Vue.use(__WEBPACK_IMPORTED_MODULE_0_vue_router__["a" /* default */]);
 
 var routes = [
 //{path: '/', component: require('./pages/Dashboard.vue'), name: 'dashboard'},
-{ path: '/admin/users', component: __webpack_require__(227), name: 'users' }, { path: '/admin/groups', component: __webpack_require__(233), name: 'groups' }, { path: '/admin/posts', component: __webpack_require__(242), name: 'posts' }, { path: '/admin/routes', component: __webpack_require__(251), name: 'routes' }, { path: '/admin/settings', component: __webpack_require__(260), name: 'settings' }, { path: '/admin/auth', component: __webpack_require__(266), name: 'auth' }, { path: '/admin/form/:id', component: __webpack_require__(269), name: 'forms' }, { path: '/admin/scores', component: __webpack_require__(278), name: 'scores' }, { path: '/admin/roles', component: __webpack_require__(290), name: 'roles' }, { path: '/admin/permissions', component: __webpack_require__(299), name: 'permissions' }, { path: '/admin/result', component: __webpack_require__(308), name: 'result' }];
+{ path: '/admin/users', component: __webpack_require__(227), name: 'users' }, { path: '/admin/groups', component: __webpack_require__(233), name: 'groups' }, { path: '/admin/posts', component: __webpack_require__(242), name: 'posts' }, { path: '/admin/routes', component: __webpack_require__(251), name: 'routes' }, { path: '/admin/settings', component: __webpack_require__(260), name: 'settings' }, { path: '/admin/auth', component: __webpack_require__(266), name: 'auth' }, { path: '/admin/form/:id', component: __webpack_require__(269), name: 'forms' }, { path: '/admin/scores', component: __webpack_require__(278), name: 'scores' }, { path: '/admin/roles', component: __webpack_require__(290), name: 'roles' }, { path: '/admin/permissions', component: __webpack_require__(299), name: 'permissions' }, { path: '/admin/result', component: __webpack_require__(308), name: 'result' }, { path: '/admin/graphs', component: __webpack_require__(355), name: 'graphs' }];
 
 window.router = new __WEBPACK_IMPORTED_MODULE_0_vue_router__["a" /* default */]({ routes: routes });
 
@@ -63575,9 +63575,256 @@ if (inBrowser && window.Vue) {
 /***/ }),
 /* 174 */,
 /* 175 */,
-/* 176 */,
-/* 177 */,
-/* 178 */,
+/* 176 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(1)
+/* script */
+var __vue_script__ = __webpack_require__(177)
+/* template */
+var __vue_template__ = null
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/charts/groupposition.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-3cf78805", Component.options)
+  } else {
+    hotAPI.reload("data-v-3cf78805", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 177 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BaseCharts_Line__ = __webpack_require__(178);
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    name: 'GroupPosition',
+    extends: __WEBPACK_IMPORTED_MODULE_0__BaseCharts_Line__["a" /* default */],
+    data: function data() {
+        return {
+            posts: [],
+            groups: [],
+            dataset: []
+        };
+    },
+    created: function created() {},
+    mounted: function mounted() {
+        this.fetchPosts();
+        this.fetchGroupsWithTimes();
+    },
+
+    methods: {
+        fetchPosts: function fetchPosts() {
+            var app = this;
+            axios.get('/api/v1/posts').then(function (response) {
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = response.data.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var post = _step.value;
+
+                        app.posts.push(post.number);
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+            });
+        },
+        fetchGroupsWithTimes: function fetchGroupsWithTimes() {
+            var app = this;
+            axios.get('/api/v1/groups').then(function (response) {
+                app.groups = response.data.data;
+                app.createDataSet(response.data.data);
+
+                app.renderChart({
+                    labels: app.posts,
+                    datasets: app.dataset
+                }, {
+                    responsive: true,
+                    maintainAspectRatio: false
+                });
+            });
+        },
+        createDataSet: function createDataSet(groups) {
+            var dataset = [],
+                app = this;
+
+            groups.forEach(function (group, key) {
+
+                var times = [];
+
+                group.relationships.times.forEach(function (time, key) {
+                    console.log(time);
+
+                    if (time.post == 1) {
+                        if (typeof time.departure !== 'undefined') {
+                            times.push(time.departure.replace(/:/g, '').slice(0, -2));
+                        }
+                    }
+
+                    if (typeof time.arrival !== 'undefined') {
+                        times.push(time.arrival.replace(/:/g, '').slice(0, -2));
+                    }
+                });
+
+                times.sort(app.sortNumber);
+
+                console.log(times);
+
+                dataset.push({
+                    label: group.groupname,
+                    borderColor: app.getRandomColor(),
+                    fill: false,
+                    data: times
+                });
+            });
+
+            this.dataset = dataset;
+        },
+        sortNumber: function sortNumber(a, b) {
+            return a - b;
+        },
+        getRandomColor: function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    }
+
+});
+
+/***/ }),
+/* 178 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_chart_js__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_chart_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_chart_js__);
+
+
+/* harmony default export */ __webpack_exports__["a"] = ({
+  render: function render(createElement) {
+    return createElement('div', {
+      style: this.styles,
+      class: this.cssClasses
+    }, [createElement('canvas', {
+      attrs: {
+        id: this.chartId,
+        width: this.width,
+        height: this.height
+      },
+      ref: 'canvas'
+    })]);
+  },
+
+  props: {
+    chartId: {
+      default: 'line-chart',
+      type: String
+    },
+    width: {
+      default: 400,
+      type: Number
+    },
+    height: {
+      default: 400,
+      type: Number
+    },
+    cssClasses: {
+      type: String,
+      default: ''
+    },
+    styles: {
+      type: Object
+    },
+    plugins: {
+      type: Array,
+      default: function _default() {
+        return [];
+      }
+    }
+  },
+
+  data: function data() {
+    return {
+      _chart: null,
+      _plugins: this.plugins
+    };
+  },
+
+
+  methods: {
+    addPlugin: function addPlugin(plugin) {
+      this.$data._plugins.push(plugin);
+    },
+    renderChart: function renderChart(data, options) {
+
+      this.$data._chart = new __WEBPACK_IMPORTED_MODULE_0_chart_js___default.a(this.$refs.canvas.getContext('2d'), {
+        type: 'line',
+        data: data,
+        options: options,
+        plugins: this.$data._plugins
+      });
+    }
+  },
+  beforeDestroy: function beforeDestroy() {
+    if (this.$data._chart) {
+      this.$data._chart.destroy();
+    }
+  }
+});
+
+/***/ }),
 /* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -85880,6 +86127,128 @@ if (false) {
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 346 */,
+/* 347 */,
+/* 348 */,
+/* 349 */,
+/* 350 */,
+/* 351 */,
+/* 352 */,
+/* 353 */,
+/* 354 */,
+/* 355 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(1)
+/* script */
+var __vue_script__ = __webpack_require__(356)
+/* template */
+var __vue_template__ = __webpack_require__(357)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/pages/Graphs.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-0b13cae2", Component.options)
+  } else {
+    hotAPI.reload("data-v-0b13cae2", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 356 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_charts_groupposition__ = __webpack_require__(176);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_charts_groupposition___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__components_charts_groupposition__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    components: { GroupPosition: __WEBPACK_IMPORTED_MODULE_0__components_charts_groupposition___default.a }
+});
+
+/***/ }),
+/* 357 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-xs-12" }, [
+        _c("div", { staticClass: "panel panel-default" }, [
+          _c("div", { staticClass: "panel-heading" }, [
+            _vm._v("Group Position")
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "panel-body" }, [[_c("group-position")]], 2)
+        ])
+      ])
+    ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-0b13cae2", module.exports)
+  }
+}
 
 /***/ })
 /******/ ]);

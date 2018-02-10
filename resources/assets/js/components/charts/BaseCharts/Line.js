@@ -62,7 +62,7 @@ export default {
       this.$data._plugins.push(plugin)
     },
     renderChart (data, options) {
-      console.log(data);
+
       this.$data._chart = new Chart(
         this.$refs.canvas.getContext('2d'), {
           type: 'line',

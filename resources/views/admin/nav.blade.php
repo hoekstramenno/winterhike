@@ -89,6 +89,9 @@
                             <li>
                                 <router-link :to="{ name: 'scores' }">Rest of Scores</router-link>
                             </li>
+                            <li>
+                                <router-link :to="{ name: 'graphs' }">Graphs</router-link>
+                            </li>
                                 @endrole
                         </ul>
                     </li>
