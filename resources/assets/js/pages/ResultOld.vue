@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Einduitslag Winterhike Haarlem 2018</h1>
+        <h1>Einduitslag Winterhike Haarlem 2018 - Old Way</h1>
         <table class="table is-bordered is-striped is-narrow">
             <thead>
             <tr>
@@ -9,13 +9,6 @@
                 <th>Ploegnaam</th>
                 <th>Vragen</th>
                 <th>Posten</th>
-                <th>Route 1</th>
-                <th>Route 2</th>
-                <th>Route 3</th>
-                <th>Route 4</th>
-                <th>Route 5</th>
-                <th>Route 6</th>
-                <th>Route 7</th>
                 <th>Tijdscore</th>
                 <th>Hints</th>
                 <th>Nood</th>
@@ -26,16 +19,15 @@
             <tbody>
             <tr v-for="(result, index) in results">
                 <td>{{ index + 1}}</td>
-                <td>{{ result.group.name }}</td>
-                <td>{{ result.group.groupname }}</td>
-                <td><strong>{{ result.score.questions }}</strong></td>
-                <td><strong>{{ result.score.posts }}</strong></td>
-                <td v-bind:class="{'red': (route.time === '00:00:00'), 'alert': (route.seconds < 0)}" v-for="(route) in result.routes"><span>{{ route.time }} - {{ route.score }}</span></td>
-                <td>{{ result.score.time }}</td>
-                <td>{{ result.score.hints }}</td>
-                <td>{{ result.score.emergency }}</td>
-                <td><strong>{{ result.score.route }}</strong></td>
-                <td><strong>{{ result.score.total }}</strong></td>
+                <td>{{ result.number }}</td>
+                <td>{{ result.name }}</td>
+                <td><strong>{{ result.scores.questions }}</strong></td>
+                <td><strong>{{ result.scores.posts }}</strong></td>
+                <td>{{ result.scores.times }}</td>
+                <td>{{ result.scores.hints }}</td>
+                <td>{{ result.scores.emergency }}</td>
+                <td><strong>{{ result.scores.total_route }}</strong></td>
+                <td><strong>{{ result.total_score }}</strong></td>
             </tr>
             </tbody>
         </table>
@@ -64,7 +56,6 @@
         },
         created() {
             this.fetchData();
-            console.log(this.results);
         },
         computed: {
             isTopTime: function () {
@@ -77,7 +68,7 @@
         methods: {
             fetchData() {
                 var app = this;
-                axios.get('/api/v1/results')
+                axios.get('/api/v1/old-results')
                     .then(response => {
                         console.log(response.data);
                         if (response) {

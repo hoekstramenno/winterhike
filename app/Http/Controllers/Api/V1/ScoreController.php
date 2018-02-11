@@ -3,6 +3,7 @@
 use App\Result;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Calculators\Winterhike\Results as OldResults;
 
 class ScoreController extends Controller
 {
@@ -12,12 +13,18 @@ class ScoreController extends Controller
     protected $result;
 
     /**
+     * @var OldResult
+     */
+    protected $oldResults;
+
+    /**
      * ScoreController constructor.
      * @param Result $result
      */
-    public function __construct(Result $result)
+    public function __construct(Result $result, OldResults $oldResults)
     {
         $this->result = $result;
+        $this->oldResults = $oldResults;
     }
 
     /**
@@ -26,5 +33,13 @@ class ScoreController extends Controller
     public function results()
     {
         return $this->result->calculate();
+    }
+
+    /**
+     * @return array
+     */
+    public function oldResults()
+    {
+        return $this->oldResults->totals();
     }
 }

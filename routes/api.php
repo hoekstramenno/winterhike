@@ -65,4 +65,5 @@ Route::group(['middleware' => ['role:Admin', 'auth:api'], 'prefix' => '/v1', 'na
      * Results and charts
      */
     Route::get('results', 'ScoreController@results');
+    Route::get('old-results', 'ScoreController@oldResults');
 });

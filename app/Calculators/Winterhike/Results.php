@@ -5,19 +5,26 @@ use App\Question;
 use App\Post;
 use App\Group;
 use App\Hint;
+use App\Setting;
+use Illuminate\Database\Eloquent\Collection;
 
 class Results
 {
     protected $posts;
+    protected $maxQuestionScore = 20;
+    protected $maxTimeScore = 90;
+    protected $minimalTimeScoreBad = 10;
+    protected $minimalTimeScoreMediocre = 20;
+    protected $minimalTimeScoreGood = 30;
+    protected $lessPointsByMinutes = 3;
+
+
 
     public function __construct()
     {
-        $posts = Post::orderBy('number', 'desc')->get();
-
-
+        $posts = Post::all();
         $this->orderPosts($posts);
     }
-
 
     /**
      * @return mixed
@@ -25,7 +32,7 @@ class Results
     public function totals()
     {
         $score = [];
-        $groups = Group::get(['id', 'name', 'groupname']);
+        $groups = Group::all();
         $questions = $this->questions();
         $posts = $this->posts();
         $times = $this->times();
@@ -36,9 +43,9 @@ class Results
 
         foreach ($groups as $group) {
             $result = [
-                'Naam' => $group->groupname,
-                'Ploegnaam' => $group->name,
-                'Groupnummer' => $group->id,
+                'group_name' => $group->groupname,
+                'name' => $group->name,
+                'number' => $group->id,
                 'total_score' => $route[$group->id] + $questions[$group->id] + $posts[$group->id]
             ];
             $result['scores'] = [
@@ -74,24 +81,24 @@ class Results
 
             $scores[$key] = $time + $hints[$key] + $emergency[$key];
 
-            $totalEmergencies = $emergency[$key] / config('factors.emergency_penalty');
+            $totalEmergencies = $emergency[$key] / Setting::path('emergency_penalty')->value('value');
             $openedEmergencies = 0 - $totalEmergencies;
 
             if ($openedEmergencies == 0) {
-                if ($scores[$key] < config('factors.minimal_time_score_good')) {
-                    $scores[$key] = config('factors.minimal_time_score_good');
+                if ($scores[$key] < $this->minimalTimeScoreBad) {
+                    $scores[$key] = $this->minimalTimeScoreGood;
                 }
             }
 
             if ($openedEmergencies == 1) {
-                if ($scores[$key] < config('factors.minimal_time_score_mediocre')) {
-                    $scores[$key] = config('factors.minimal_time_score_mediocre');
+                if ($scores[$key] < $this->minimalTimeScoreMediocre) {
+                    $scores[$key] = $this->minimalTimeScoreMediocre;
                 }
             }
 
             if ($openedEmergencies > 1) {
-                if ($scores[$key] < config('factors.minimal_time_score_bad')) {
-                    $scores[$key] = config('factors.minimal_time_score_bad');
+                if ($scores[$key] < $this->minimalTimeScoreBad) {
+                    $scores[$key] = $this->minimalTimeScoreBad;
                 }
             }
         }
@@ -112,9 +119,10 @@ class Results
         ]);
 
         // Calculate points per question
-        $totalQuestions = config('factors.total_questions');
-        $maxScore = config('factors.max_question_score');
+        $totalQuestions     = Setting::path('total_questions')->value('value');
+        $maxScore           = $this->maxQuestionScore;
         $pointsPerQuestion = $maxScore / $totalQuestions;
+
 
         foreach ($questionScores as $score) {
             $results[$score->group_id] = round($score->right_answers * $pointsPerQuestion);
@@ -156,8 +164,11 @@ class Results
             'closed'
         ]);
 
+        $totalEmergencies = Setting::path('total_emergencies')->value('value');
+        $emergencyPenalty = Setting::path('emergency_penalty')->value('value');
+
         foreach ($emergency as $emergency) {
-            $scores[$emergency->group_id] = ($emergency->closed - config('factors.total_emergencies')) * config('factors.emergency_penalty');
+            $scores[$emergency->group_id] = ($emergency->closed - $totalEmergencies) * $emergencyPenalty;
         }
 
         return $scores;
@@ -171,8 +182,11 @@ class Results
             'closed'
         ]);
 
+        $totalHints = Setting::path('total_hints')->value('value');
+        $hintPenalty = Setting::path('hint_penalty')->value('value');
+
         foreach ($hints as $hint) {
-            $scores[$hint->group_id] = ($hint->closed - config('factors.total_hints')) * config('factors.hint_penalty');
+            $scores[$hint->group_id] = ($hint->closed - $totalHints) * $hintPenalty;
         }
 
         return $scores;
@@ -207,7 +221,7 @@ class Results
         foreach ($results as $groupId => $time) {
             $scores[$groupId] = 10;
             $difference = $time - $fastestTime;
-            $scores[$groupId] = config('factors.max_time_score') - floor(($difference / 60) / config('factors.less_points_by_minutes'));
+            $scores[$groupId] = $this->maxTimeScore - floor(($difference / 60) / $this->lessPointsByMinutes);
         }
 
         return $scores;
@@ -216,14 +230,14 @@ class Results
     /**
      * Order posts on post number, save it in a global variable
      *
-     * @param \Illuminate\Database\Eloquent\Collection $posts
+     * @param Collection $posts
      * @return void
      */
-    private function orderPosts(\Illuminate\Database\Eloquent\Collection $posts)
+    private function orderPosts(Collection $posts)
     {
         $this->posts = [];
         foreach ($posts as $post) {
-            $this->posts[$post->post_nr] = $post->id;
+            $this->posts[$post->number] = $post->id;
         }
         ksort($this->posts);
     }
@@ -237,6 +251,7 @@ class Results
     private function calculateHikeTime($groups)
     {
         $results = [];
+
         $firstPostId = array_values($this->posts)[0];
         $lastPostId = last($this->posts);
 
@@ -247,7 +262,7 @@ class Results
 
             foreach ($group->times as $time) {
                 if ($time->post_id == $firstPostId) {
-                    $startTime = strtotime($time->leaving);
+                    $startTime = strtotime($time->departure);
                     continue;
                 }
                 if ($time->post_id == $lastPostId) {
@@ -255,17 +270,11 @@ class Results
                     continue;
                 }
 
-                $totalPostTime = $totalPostTime + (strtotime($time->leaving) - strtotime($time->arrival));
+                $totalPostTime = $totalPostTime + (strtotime($time->departure) - strtotime($time->arrival));
             }
-
-
             $totalHikeTime = $finishTime - $startTime;
             $results[$group->id] = $totalHikeTime - $totalPostTime;
-
-
         }
-
-
         return $results;
     }
 }

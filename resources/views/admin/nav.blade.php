@@ -55,9 +55,18 @@
                                 </li>
                             </ul>
                     </li>
-                    <li>
-                        <router-link :to="{ name: 'result' }">Result</router-link>
+                    <li class="dropdown">
+                        <a href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle">Results <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <router-link :to="{ name: 'oldresult' }">Result with old calculation</router-link>
+                            </li>
+                            <li>
+                                <router-link :to="{ name: 'result' }">Result with new calculation</router-link>
+                            </li>
+                        </ul>
                     </li>
+
                 </ul>
                 @endrole
 

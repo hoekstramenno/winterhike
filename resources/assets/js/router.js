@@ -15,6 +15,7 @@ const routes = [
     {path: '/admin/roles', component: require('./pages/Roles.vue'), name: 'roles'},
     {path: '/admin/permissions', component: require('./pages/Permissions.vue'), name: 'permissions'},
     {path: '/admin/result', component: require('./pages/Result.vue'), name: 'result'},
+    {path: '/admin/old-result', component: require('./pages/ResultOld.vue'), name: 'oldresult'},
     {path: '/admin/graphs', component: require('./pages/Graphs.vue'), name: 'graphs'},
 ]
 
